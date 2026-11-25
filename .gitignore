@@ -1,0 +1,23 @@
+# Seguridad y entorno
+.env
+.env.*
+!.env.example
+
+# Datos locales y logs
+data/
+*.jsonl
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Node / Frontend
+frontend/node_modules/
+frontend/dist/
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db

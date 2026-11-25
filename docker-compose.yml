@@ -1,0 +1,22 @@
+services:
+  hq-dashboard:
+    build: .
+    ports:
+      - "4320:4320"
+    environment:
+      - HQ_PASSWORD=${HQ_PASSWORD:-}
+      - HQ_SECRET_KEY=${HQ_SECRET_KEY:-}
+      - VAULT_REPO_URL=${VAULT_REPO_URL:-https://github.com/camilomurielph/myVault}
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+      - OBSIDIAN_VAULT_PATH=/app/vault
+      - AUTO_GIT_SYNC=${AUTO_GIT_SYNC:-true}
+      - GIT_USER_NAME=${GIT_USER_NAME:-Obsidian HQ}
+      - GIT_USER_EMAIL=${GIT_USER_EMAIL:-hq@obsidian.local}
+    volumes:
+      - hq_vault:/app/vault
+      - hq_data:/app/data
+    restart: unless-stopped
+
+volumes:
+  hq_vault:
+  hq_data:
