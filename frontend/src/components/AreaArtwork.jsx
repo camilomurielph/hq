@@ -3,14 +3,28 @@ import React from 'react'
 /**
  * Renders either a user-uploaded cover image or an atmospheric SVG/CSS artwork backdrop.
  */
-export function AreaArtwork({ style = 'koi', coverUrl = null, className = '' }) {
+export function AreaArtwork({
+  style = 'koi',
+  coverUrl = null,
+  posX = 50,
+  posY = 50,
+  zoom = 100,
+  className = '',
+}) {
   if (coverUrl) {
     return (
       <div className={`relative overflow-hidden bg-[#080c0d] ${className}`}>
         <img
           src={coverUrl}
           alt=""
-          className="h-full w-full object-cover"
+          decoding="async"
+          fetchPriority="high"
+          style={{
+            objectPosition: `${posX}% ${posY}%`,
+            transform: zoom !== 100 ? `scale(${zoom / 100})` : undefined,
+            transformOrigin: `${posX}% ${posY}%`,
+          }}
+          className="h-full w-full object-cover transition-transform duration-200"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/15" />
       </div>

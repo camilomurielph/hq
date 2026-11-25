@@ -10,6 +10,7 @@ import {
   Dumbbell,
   FilePlus2,
   HeartPulse,
+  ImagePlus,
 } from 'lucide-react'
 import { AreaArtwork } from './AreaArtwork'
 
@@ -54,7 +55,7 @@ const MONTH_NAMES = [
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
 ]
 
-export function SaludView({ onBack, onOpenNote, onNewNoteInFolder }) {
+export function SaludView({ areaTheme, onEditCover, onBack, onOpenNote, onNewNoteInFolder }) {
   const [data, setData] = useState(null)
   const [subView, setSubView] = useState(null) // null | 'Entrenamiento' | 'Salud y estado' | 'Artículos y estudios'
   const [calMode, setCalMode] = useState('semanal') // 'semanal' | 'mensual'
@@ -332,7 +333,14 @@ export function SaludView({ onBack, onOpenNote, onNewNoteInFolder }) {
   return (
     <div className="space-y-6">
       <div className="relative h-36 overflow-hidden rounded-3xl border border-white/10">
-        <AreaArtwork style="zen" className="h-full w-full" />
+        <AreaArtwork
+          style={areaTheme?.image_style || 'zen'}
+          coverUrl={areaTheme?.cover_url}
+          posX={areaTheme?.cover_pos_x}
+          posY={areaTheme?.cover_pos_y}
+          zoom={areaTheme?.cover_zoom}
+          className="h-full w-full"
+        />
         <div className="absolute inset-0 flex items-end justify-between p-6">
           <div>
             <button
@@ -344,6 +352,15 @@ export function SaludView({ onBack, onOpenNote, onNewNoteInFolder }) {
             </button>
             <h1 className="text-3xl font-extrabold text-white">Salud</h1>
           </div>
+          {onEditCover && (
+            <button
+              onClick={onEditCover}
+              className="flex items-center gap-1.5 rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-medium text-white backdrop-blur-md hover:bg-black/75 cursor-pointer"
+            >
+              <ImagePlus className="h-3.5 w-3.5 text-[#f2b880]" />
+              <span>{areaTheme?.cover_url ? 'Portada / Ajustar' : 'Portada'}</span>
+            </button>
+          )}
         </div>
       </div>
 

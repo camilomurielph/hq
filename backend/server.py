@@ -547,6 +547,9 @@ def get_overview() -> dict[str, Any]:
                 "gradient": theme["gradient"],
                 "image_style": custom.get("image_style") or theme["image_style"],
                 "cover_url": custom.get("cover_url"),
+                "cover_pos_x": custom.get("cover_pos_x", 50),
+                "cover_pos_y": custom.get("cover_pos_y", 50),
+                "cover_zoom": custom.get("cover_zoom", 100),
                 "linked_count": len(moc_note["links"]) if moc_note else 0,
                 "existing_count": sum(1 for n in linked_notes if n.get("path")),
                 "pending_tasks": sum(
@@ -1141,7 +1144,10 @@ def get_cover_image(filename: str):
     target = (COVERS_DIR / safe_name).resolve()
     if not target.exists() or not target.is_file():
         raise HTTPException(status_code=404, detail="Imagen no encontrada")
-    return FileResponse(str(target))
+    return FileResponse(
+        str(target),
+        headers={"Cache-Control": "public, max-age=31536000, immutable"},
+    )
 
 
 @app.post("/api/areas")
@@ -1200,11 +1206,34 @@ async def upload_area_cover(area_name: str, cover: UploadFile = File(...)) -> di
     meta = load_areas_meta()
     entry = meta.get(area_name, {})
     entry["cover_url"] = f"/api/covers/{fname}"
+    entry.setdefault("cover_pos_x", 50)
+    entry.setdefault("cover_pos_y", 50)
+    entry.setdefault("cover_zoom", 100)
     meta[area_name] = entry
     save_areas_meta(meta)
     log_activity("Usuario", "Hecho", "Áreas", f"Portada actualizada en {area_name}")
     trigger_auto_sync(f"portada de {area_name}")
     return {"status": "ok", "cover_url": entry["cover_url"]}
+
+
+class CoverSettingsPayload(BaseModel):
+    cover_pos_x: int = 50
+    cover_pos_y: int = 50
+    cover_zoom: int = 100
+
+
+@app.patch("/api/areas/{area_name}/cover-settings")
+def update_area_cover_settings(area_name: str, payload: CoverSettingsPayload) -> dict[str, Any]:
+    meta = load_areas_meta()
+    entry = meta.get(area_name, {})
+    entry["cover_pos_x"] = max(0, min(100, payload.cover_pos_x))
+    entry["cover_pos_y"] = max(0, min(100, payload.cover_pos_y))
+    entry["cover_zoom"] = max(100, min(250, payload.cover_zoom))
+    meta[area_name] = entry
+    save_areas_meta(meta)
+    log_activity("Usuario", "Hecho", "Áreas", f"Ajuste de portada en {area_name}")
+    trigger_auto_sync(f"ajuste portada de {area_name}")
+    return {"status": "ok", "meta": entry}
 
 
 # ================= GOOGLE-TASKS STYLE LISTS =================

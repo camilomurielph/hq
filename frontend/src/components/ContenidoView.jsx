@@ -4,7 +4,7 @@ import { AreaArtwork } from './AreaArtwork'
 
 const STAR_SCORES = [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5]
 
-export function LecturasSection({ onBack, onOpenNote, onRefreshVault }) {
+export function LecturasSection({ areaTheme, onEditCover, onBack, onOpenNote, onRefreshVault }) {
   const [collections, setCollections] = useState([])
   const [selectedCol, setSelectedCol] = useState(null)
   const [showAddCol, setShowAddCol] = useState(false)
@@ -435,9 +435,16 @@ export function LecturasSection({ onBack, onOpenNote, onRefreshVault }) {
   // ==================== COLLECTIONS GRID VIEW ====================
   return (
     <div className="space-y-6">
-      <div className="relative h-40 overflow-hidden rounded-3xl border border-white/10">
-        <AreaArtwork style="library" className="h-full w-full" />
-        <div className="absolute inset-0 flex items-end justify-between p-6">
+      <div className="relative min-h-[160px] sm:h-40 overflow-hidden rounded-3xl border border-white/10">
+        <AreaArtwork
+          style={areaTheme?.image_style || 'library'}
+          coverUrl={areaTheme?.cover_url}
+          posX={areaTheme?.cover_pos_x}
+          posY={areaTheme?.cover_pos_y}
+          zoom={areaTheme?.cover_zoom}
+          className="h-full w-full"
+        />
+        <div className="absolute inset-0 flex flex-wrap items-end justify-between gap-3 p-5 sm:p-6">
           <div>
             <button
               onClick={onBack}
@@ -446,15 +453,26 @@ export function LecturasSection({ onBack, onOpenNote, onRefreshVault }) {
               <ArrowLeft className="h-3.5 w-3.5" />
               Volver a Áreas
             </button>
-            <h1 className="text-3xl font-extrabold text-white">Contenido / Lecturas</h1>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-white">Contenido / Lecturas</h1>
           </div>
-          <button
-            onClick={() => setShowAddCol((v) => !v)}
-            className="flex items-center gap-1.5 rounded-xl bg-[#f2b880] px-4 py-2 text-xs font-bold text-zinc-950 hover:bg-[#f5c496] cursor-pointer"
-          >
-            <Plus className="h-4 w-4" />
-            Nueva colección
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            {onEditCover && (
+              <button
+                onClick={onEditCover}
+                className="flex items-center gap-1.5 rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-medium text-white backdrop-blur-md hover:bg-black/75 cursor-pointer"
+              >
+                <ImagePlus className="h-3.5 w-3.5 text-[#f2b880]" />
+                <span>{areaTheme?.cover_url ? 'Portada / Ajustar' : 'Portada'}</span>
+              </button>
+            )}
+            <button
+              onClick={() => setShowAddCol((v) => !v)}
+              className="flex items-center gap-1.5 rounded-xl bg-[#f2b880] px-4 py-2 text-xs font-bold text-zinc-950 hover:bg-[#f5c496] cursor-pointer"
+            >
+              <Plus className="h-4 w-4" />
+              Nueva colección
+            </button>
+          </div>
         </div>
       </div>
 
@@ -552,7 +570,7 @@ export function LecturasSection({ onBack, onOpenNote, onRefreshVault }) {
   )
 }
 
-export function SeriesSection({ onBack, onOpenNote, onRefreshVault }) {
+export function SeriesSection({ areaTheme, onEditCover, onBack, onOpenNote, onRefreshVault }) {
   const [items, setItems] = useState([])
   const [personas, setPersonas] = useState([])
   const [filterEstado, setFilterEstado] = useState('Todos')
@@ -620,9 +638,16 @@ export function SeriesSection({ onBack, onOpenNote, onRefreshVault }) {
 
   return (
     <div className="space-y-6">
-      <div className="relative h-40 overflow-hidden rounded-3xl border border-white/10">
-        <AreaArtwork style="cinema" className="h-full w-full" />
-        <div className="absolute inset-0 flex items-end justify-between p-6">
+      <div className="relative min-h-[160px] sm:h-40 overflow-hidden rounded-3xl border border-white/10">
+        <AreaArtwork
+          style={areaTheme?.image_style || 'cinema'}
+          coverUrl={areaTheme?.cover_url}
+          posX={areaTheme?.cover_pos_x}
+          posY={areaTheme?.cover_pos_y}
+          zoom={areaTheme?.cover_zoom}
+          className="h-full w-full"
+        />
+        <div className="absolute inset-0 flex flex-wrap items-end justify-between gap-3 p-5 sm:p-6">
           <div>
             <button
               onClick={onBack}
@@ -631,15 +656,26 @@ export function SeriesSection({ onBack, onOpenNote, onRefreshVault }) {
               <ArrowLeft className="h-3.5 w-3.5" />
               Volver a Áreas
             </button>
-            <h1 className="text-3xl font-extrabold text-white">Contenido / Series y Películas</h1>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-white">Contenido / Series y Películas</h1>
           </div>
-          <button
-            onClick={() => setShowAdd((v) => !v)}
-            className="flex items-center gap-1.5 rounded-xl bg-[#f2b880] px-4 py-2 text-xs font-bold text-zinc-950 hover:bg-[#f5c496] cursor-pointer"
-          >
-            <Plus className="h-4 w-4" />
-            Agregar serie / película
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            {onEditCover && (
+              <button
+                onClick={onEditCover}
+                className="flex items-center gap-1.5 rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-medium text-white backdrop-blur-md hover:bg-black/75 cursor-pointer"
+              >
+                <ImagePlus className="h-3.5 w-3.5 text-[#f2b880]" />
+                <span>{areaTheme?.cover_url ? 'Portada / Ajustar' : 'Portada'}</span>
+              </button>
+            )}
+            <button
+              onClick={() => setShowAdd((v) => !v)}
+              className="flex items-center gap-1.5 rounded-xl bg-[#f2b880] px-4 py-2 text-xs font-bold text-zinc-950 hover:bg-[#f5c496] cursor-pointer"
+            >
+              <Plus className="h-4 w-4" />
+              Agregar serie / película
+            </button>
+          </div>
         </div>
       </div>
 

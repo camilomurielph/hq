@@ -31,6 +31,7 @@ import {
 } from 'lucide-react'
 import { AreaArtwork } from './components/AreaArtwork'
 import { LecturasSection, SeriesSection } from './components/ContenidoView'
+import { CoverAdjustModal } from './components/CoverAdjustModal'
 import { FoldersView } from './components/FoldersView'
 import { LoginScreen } from './components/LoginScreen'
 import { MarkdownEditor } from './components/MarkdownEditor'
@@ -95,6 +96,7 @@ export default function App() {
   const [newAreaSubtitle, setNewAreaSubtitle] = useState('')
   const [newAreaStyle, setNewAreaStyle] = useState('forest')
   const [newAreaCover, setNewAreaCover] = useState(null)
+  const [coverModalArea, setCoverModalArea] = useState(null)
   const [showShortcuts, setShowShortcuts] = useState(false)
 
   // Tasks form state
@@ -143,7 +145,17 @@ export default function App() {
         setAuthRequired(true)
         return
       }
-      if (ovRes.ok) setOverview(await ovRes.json())
+      if (ovRes.ok) {
+        const ovData = await ovRes.json()
+        setOverview(ovData)
+        // Preload all Area cover images so carousel & cards render instantaneously
+        ;(ovData.areas || []).forEach((a) => {
+          if (a.cover_url) {
+            const img = new Image()
+            img.src = a.cover_url
+          }
+        })
+      }
       if (tkRes.ok) setTasksData(await tkRes.json())
       if (tlRes.ok) {
         const tld = await tlRes.json()
@@ -822,7 +834,14 @@ export default function App() {
                     }}
                     className="hidden lg:block absolute left-0 h-[370px] w-[200px] overflow-hidden rounded-3xl border border-white/10 opacity-40 hover:opacity-65 transition-all duration-300 cursor-pointer"
                   >
-                    <AreaArtwork style={prevArea.image_style} coverUrl={prevArea.cover_url} className="h-full w-full" />
+                    <AreaArtwork
+                      style={prevArea.image_style}
+                      coverUrl={prevArea.cover_url}
+                      posX={prevArea.cover_pos_x}
+                      posY={prevArea.cover_pos_y}
+                      zoom={prevArea.cover_zoom}
+                      className="h-full w-full"
+                    />
                     <div className="absolute bottom-6 left-5 right-4">
                       <div className="text-lg font-bold text-white truncate">{prevArea.name}</div>
                     </div>
@@ -836,7 +855,14 @@ export default function App() {
                     carouselDir === 'next' ? 'animate-carousel-next' : 'animate-carousel-prev'
                   }`}
                 >
-                  <AreaArtwork style={activeArea.image_style} coverUrl={activeArea.cover_url} className="h-full w-full" />
+                  <AreaArtwork
+                    style={activeArea.image_style}
+                    coverUrl={activeArea.cover_url}
+                    posX={activeArea.cover_pos_x}
+                    posY={activeArea.cover_pos_y}
+                    zoom={activeArea.cover_zoom}
+                    className="h-full w-full"
+                  />
 
                   {/* Left Arrow */}
                   <button
@@ -897,7 +923,14 @@ export default function App() {
                     }}
                     className="hidden lg:block absolute right-0 h-[370px] w-[200px] overflow-hidden rounded-3xl border border-white/10 opacity-40 hover:opacity-65 transition-all duration-300 cursor-pointer"
                   >
-                    <AreaArtwork style={nextArea.image_style} coverUrl={nextArea.cover_url} className="h-full w-full" />
+                    <AreaArtwork
+                      style={nextArea.image_style}
+                      coverUrl={nextArea.cover_url}
+                      posX={nextArea.cover_pos_x}
+                      posY={nextArea.cover_pos_y}
+                      zoom={nextArea.cover_zoom}
+                      className="h-full w-full"
+                    />
                     <div className="absolute bottom-6 left-5 right-4">
                       <div className="text-lg font-bold text-white truncate">{nextArea.name}</div>
                     </div>
@@ -957,6 +990,8 @@ export default function App() {
         {/* ================= AREA DETAIL ================= */}
         {tab === 'area_detail' && selectedArea === 'Lecturas' && (
           <LecturasSection
+            areaTheme={areaDetail?.theme}
+            onEditCover={() => setCoverModalArea({ name: 'Lecturas', ...areaDetail?.theme })}
             onBack={() => setTab('areas')}
             onOpenNote={(p) => setOpenNotePath(p)}
             onRefreshVault={fetchAll}
@@ -964,6 +999,8 @@ export default function App() {
         )}
         {tab === 'area_detail' && selectedArea === 'Series y Películas' && (
           <SeriesSection
+            areaTheme={areaDetail?.theme}
+            onEditCover={() => setCoverModalArea({ name: 'Series y Películas', ...areaDetail?.theme })}
             onBack={() => setTab('areas')}
             onOpenNote={(p) => setOpenNotePath(p)}
             onRefreshVault={fetchAll}
@@ -971,6 +1008,8 @@ export default function App() {
         )}
         {tab === 'area_detail' && selectedArea === 'Salud' && (
           <SaludView
+            areaTheme={areaDetail?.theme}
+            onEditCover={() => setCoverModalArea({ name: 'Salud', ...areaDetail?.theme })}
             onBack={() => setTab('areas')}
             onOpenNote={(p) => setOpenNotePath(p)}
             onNewNoteInFolder={(folder) => openNewNoteIn(folder)}
@@ -982,10 +1021,13 @@ export default function App() {
           selectedArea !== 'Salud' &&
           areaDetail && (
           <div className="space-y-6">
-            <div className="relative h-44 overflow-hidden rounded-3xl border border-white/10">
+            <div className="relative min-h-[168px] sm:h-44 overflow-hidden rounded-3xl border border-white/10">
               <AreaArtwork
                 style={areaDetail.theme?.image_style || 'forest'}
                 coverUrl={areaDetail.theme?.cover_url}
+                posX={areaDetail.theme?.cover_pos_x}
+                posY={areaDetail.theme?.cover_pos_y}
+                zoom={areaDetail.theme?.cover_zoom}
                 className="h-full w-full"
               />
               <div className="absolute inset-0 flex items-end justify-between p-6">
@@ -1033,16 +1075,13 @@ export default function App() {
                       Nueva nota
                     </button>
                   )}
-                  <label className="flex items-center gap-1.5 rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-medium text-white backdrop-blur-md hover:bg-black/75 cursor-pointer">
+                  <button
+                    onClick={() => setCoverModalArea({ name: areaDetail.name, ...areaDetail.theme })}
+                    className="flex items-center gap-1.5 rounded-xl border border-white/15 bg-black/50 px-3.5 py-2 text-xs font-medium text-white backdrop-blur-md hover:bg-black/75 cursor-pointer"
+                  >
                     <ImagePlus className="h-3.5 w-3.5 text-[#f2b880]" />
-                    <span>Portada</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => handleUploadAreaCover(areaDetail.name, e.target.files?.[0])}
-                    />
-                  </label>
+                    <span>{areaDetail.theme?.cover_url ? 'Portada / Ajustar' : 'Portada'}</span>
+                  </button>
                   <button
                     onClick={() => setOpenNotePath(areaDetail.moc_path)}
                     className="rounded-xl border border-white/15 bg-black/50 px-4 py-2 text-xs font-medium text-white backdrop-blur-md hover:bg-black/75 cursor-pointer"
@@ -1306,7 +1345,14 @@ export default function App() {
                   className="group overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] hover:border-[#f2b880]/45 transition-all cursor-pointer"
                 >
                   <div className="relative h-36">
-                    <AreaArtwork style={a.image_style} coverUrl={a.cover_url} className="h-full w-full" />
+                    <AreaArtwork
+                      style={a.image_style}
+                      coverUrl={a.cover_url}
+                      posX={a.cover_pos_x}
+                      posY={a.cover_pos_y}
+                      zoom={a.cover_zoom}
+                      className="h-full w-full"
+                    />
                     <div className="absolute bottom-3 left-4 rounded-xl bg-black/60 px-3 py-1 backdrop-blur-md">
                       <span className="text-sm font-bold text-white">{a.name}</span>
                     </div>
@@ -1765,6 +1811,23 @@ export default function App() {
           </form>
         </div>
       )}
+      {/* Cover Adjust Modal */}
+      {coverModalArea && (
+        <CoverAdjustModal
+          areaName={coverModalArea.name}
+          initialCoverUrl={coverModalArea.cover_url}
+          initialPosX={coverModalArea.cover_pos_x ?? 50}
+          initialPosY={coverModalArea.cover_pos_y ?? 50}
+          initialZoom={coverModalArea.cover_zoom ?? 100}
+          imageStyle={coverModalArea.image_style || 'forest'}
+          onClose={() => setCoverModalArea(null)}
+          onSaved={async () => {
+            await fetchAll()
+            if (selectedArea) await openArea(selectedArea)
+          }}
+        />
+      )}
+
       {/* Shortcuts Help Modal */}
       {showShortcuts && (
         <div
