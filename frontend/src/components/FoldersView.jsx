@@ -153,7 +153,7 @@ export function FoldersView({ onOpenNote, onNewNoteInFolder, onRefreshVault }) {
         </div>
 
         {/* Right Pane: Notes in selected folder */}
-        <div className="lg:col-span-8 rounded-3xl border border-white/[0.08] bg-white/[0.03] p-4 sm:p-5 backdrop-blur-xl space-y-4">
+        <div className="min-w-0 lg:col-span-8 rounded-3xl border border-white/[0.08] bg-white/[0.03] p-4 sm:p-5 backdrop-blur-xl space-y-4">
           <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
             <div className="min-w-0">
               <div className="text-[11px] text-zinc-400">Carpeta actual</div>
@@ -180,7 +180,7 @@ export function FoldersView({ onOpenNote, onNewNoteInFolder, onRefreshVault }) {
                   draggable
                   onDragStart={() => setDragNote(n)}
                   onClick={() => onOpenNote(n.path)}
-                  className="group flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 hover:border-[#f2b880]/40 hover:bg-white/[0.05] transition-all cursor-pointer"
+                  className="group min-w-0 overflow-hidden flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 hover:border-[#f2b880]/40 hover:bg-white/[0.05] transition-all cursor-pointer"
                 >
                   <div className="flex items-start gap-2.5 min-w-0 flex-1">
                     <GripVertical className="hidden sm:block mt-0.5 h-4 w-4 shrink-0 text-zinc-600 opacity-0 group-hover:opacity-100 cursor-grab" />
@@ -197,13 +197,13 @@ export function FoldersView({ onOpenNote, onNewNoteInFolder, onRefreshVault }) {
 
                   <div
                     onClick={(e) => e.stopPropagation()}
-                    className="flex items-center justify-end"
+                    className="flex min-w-0 max-w-full items-center justify-end"
                   >
                     <select
                       value={activeFolder.path}
                       onChange={(e) => handleMoveNote(n, e.target.value)}
                       title="Mover nota a otra carpeta"
-                      className="w-full sm:w-auto sm:max-w-[190px] rounded-xl border border-white/15 bg-zinc-900 px-3 py-2 sm:py-1.5 text-xs text-zinc-200 focus:outline-none cursor-pointer"
+                      className="w-full min-w-0 max-w-full sm:w-auto sm:max-w-[190px] truncate rounded-xl border border-white/15 bg-zinc-900 px-3 py-2 sm:py-1.5 text-xs text-zinc-200 focus:outline-none cursor-pointer"
                     >
                       {folders.map((dest) => (
                         <option key={dest.path} value={dest.path}>

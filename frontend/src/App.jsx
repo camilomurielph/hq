@@ -1592,10 +1592,10 @@ export default function App() {
                     data-nav-item
                     tabIndex={0}
                     onClick={() => setOpenNotePath(n.path)}
-                    className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-4 hover:border-[#f2b880]/40 cursor-pointer"
+                    className="min-w-0 overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] p-4 hover:border-[#f2b880]/40 cursor-pointer"
                   >
-                    <div className="flex items-center justify-between gap-2">
-                      <h3 className="text-base sm:text-sm font-bold text-white truncate">{n.title}</h3>
+                    <div className="flex items-center justify-between gap-2 min-w-0">
+                      <h3 className="min-w-0 flex-1 text-base sm:text-sm font-bold text-white truncate">{n.title}</h3>
                       <span className="shrink-0 rounded-md bg-[#f2b880]/15 px-2 py-0.5 text-[10px] font-semibold text-[#f2b880]">
                         {n.folder}
                       </span>
