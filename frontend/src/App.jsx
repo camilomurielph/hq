@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Activity,
   ArrowLeft,
@@ -74,6 +74,7 @@ export default function App() {
 
   const [carouselIdx, setCarouselIdx] = useState(0)
   const [carouselDir, setCarouselDir] = useState('next')
+  const touchStartX = useRef(null)
   const [clock, setClock] = useState(() => formatClock())
   const [todayLabel, setTodayLabel] = useState(() => formatSpanishDate())
   const [refreshing, setRefreshing] = useState(false)
@@ -680,8 +681,8 @@ export default function App() {
   return (
     <div className={`relative min-h-screen bg-[#070b0c] text-zinc-100 transition-colors duration-700 ${ambientBg}`}>
       {/* Top Header */}
-      <header className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 sm:px-6 pt-5 pb-3">
-        <div className="flex items-center gap-2 text-sm">
+      <header className="relative z-30 mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 sm:px-6 pt-[max(1rem,env(safe-area-inset-top))] pb-3">
+        <div className="flex items-center gap-2 text-sm min-w-0">
           <button
             onClick={() => setTab('inicio')}
             className="font-bold tracking-wide text-white hover:text-[#f2b880] transition-colors cursor-pointer"
@@ -689,10 +690,10 @@ export default function App() {
             HQ
           </button>
           <span className="text-zinc-500">/</span>
-          <span className="text-zinc-300 font-medium truncate max-w-[140px] sm:max-w-none">{breadcrumbLabel}</span>
+          <span className="text-zinc-300 font-medium truncate max-w-[110px] sm:max-w-none">{breadcrumbLabel}</span>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
           <div className="hidden md:flex items-baseline gap-2.5 mr-1">
             <span className="text-2xl font-extrabold tracking-tight text-white">{clock}</span>
             <span className="text-xs text-zinc-400">{todayLabel}</span>
@@ -703,9 +704,9 @@ export default function App() {
               onClick={handleGitSync}
               disabled={syncingGit}
               title={gitStatus.last_commit || 'Sincronizar con GitHub'}
-              className="relative flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.05] px-3 py-1.5 text-xs font-medium text-zinc-200 hover:border-[#f2b880]/40 hover:bg-white/[0.09] transition-all cursor-pointer disabled:opacity-50"
+              className="relative flex h-9 sm:h-8 items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.05] px-2.5 sm:px-3 text-xs font-medium text-zinc-200 hover:border-[#f2b880]/40 hover:bg-white/[0.09] transition-all cursor-pointer disabled:opacity-50"
             >
-              <GitBranch className={`h-3.5 w-3.5 ${syncingGit ? 'animate-pulse text-[#f2b880]' : 'text-emerald-400'}`} />
+              <GitBranch className={`h-4 w-4 sm:h-3.5 sm:w-3.5 ${syncingGit ? 'animate-pulse text-[#f2b880]' : 'text-emerald-400'}`} />
               <span className="hidden sm:inline">{syncingGit ? 'Sync...' : 'Sync Git'}</span>
               {gitStatus.dirty && (
                 <span className="h-1.5 w-1.5 rounded-full bg-[#f2b880]" />
@@ -715,15 +716,16 @@ export default function App() {
 
           <button
             onClick={handleOpenTodayJournal}
-            className="rounded-xl border border-white/10 bg-white/[0.05] px-3 py-1.5 text-xs font-medium text-zinc-200 hover:border-[#f2b880]/40 hover:bg-white/[0.09] transition-all cursor-pointer"
+            className="flex h-9 sm:h-8 items-center rounded-xl border border-white/10 bg-white/[0.05] px-2.5 sm:px-3 text-xs font-medium text-zinc-200 hover:border-[#f2b880]/40 hover:bg-white/[0.09] transition-all cursor-pointer"
           >
-            Diario de hoy
+            Diario
+            <span className="hidden sm:inline">&nbsp;de hoy</span>
           </button>
 
           <button
             onClick={() => setNewNoteModal(true)}
             title="Crear nueva nota"
-            className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-white/[0.05] text-zinc-200 hover:border-[#f2b880]/40 hover:text-[#f2b880] transition-all cursor-pointer"
+            className="flex h-9 w-9 sm:h-8 sm:w-8 items-center justify-center rounded-xl border border-white/10 bg-white/[0.05] text-zinc-200 hover:border-[#f2b880]/40 hover:text-[#f2b880] transition-all cursor-pointer"
           >
             <FilePlus2 className="h-4 w-4" />
           </button>
@@ -731,9 +733,9 @@ export default function App() {
           <button
             onClick={fetchAll}
             title="Refrescar vault"
-            className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-white/[0.05] text-zinc-300 hover:bg-white/[0.1] transition-all cursor-pointer"
+            className="flex h-9 w-9 sm:h-8 sm:w-8 items-center justify-center rounded-xl border border-white/10 bg-white/[0.05] text-zinc-300 hover:bg-white/[0.1] transition-all cursor-pointer"
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin text-[#f2b880]' : ''}`} />
+            <RefreshCw className={`h-4 w-4 sm:h-3.5 sm:w-3.5 ${refreshing ? 'animate-spin text-[#f2b880]' : ''}`} />
           </button>
 
           <button
@@ -851,7 +853,24 @@ export default function App() {
                 {/* Main Center Card */}
                 <div
                   key={`${carouselIdx}-${carouselDir}`}
-                  className={`relative z-10 h-[340px] sm:h-[430px] w-full max-w-4xl overflow-hidden rounded-3xl border border-white/15 shadow-2xl ${
+                  onTouchStart={(e) => {
+                    touchStartX.current = e.touches[0].clientX
+                  }}
+                  onTouchEnd={(e) => {
+                    if (touchStartX.current === null || areas.length < 2) return
+                    const dx = e.changedTouches[0].clientX - touchStartX.current
+                    touchStartX.current = null
+                    if (Math.abs(dx) > 45) {
+                      if (dx < 0) {
+                        setCarouselDir('next')
+                        setCarouselIdx((carouselIdx + 1) % areas.length)
+                      } else {
+                        setCarouselDir('prev')
+                        setCarouselIdx((carouselIdx - 1 + areas.length) % areas.length)
+                      }
+                    }
+                  }}
+                  className={`touch-pan-y relative z-10 h-[340px] sm:h-[430px] w-full max-w-4xl overflow-hidden rounded-3xl border border-white/15 shadow-2xl ${
                     carouselDir === 'next' ? 'animate-carousel-next' : 'animate-carousel-prev'
                   }`}
                 >
@@ -1383,15 +1402,15 @@ export default function App() {
 
         {/* ================= EXPLORADOR DE NOTAS ================= */}
         {tab === 'notas' && (
-          <div className="space-y-5">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex flex-wrap items-center gap-2">
+          <div className="space-y-4 sm:space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="no-scrollbar flex flex-nowrap sm:flex-wrap items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
                 {['Todas', 'Proyectos', 'Personas', 'Finanzas', 'Trabajo', 'Reflexiones', 'Contenido', 'Salud', 'Hobbies e intereses', 'Tareas', 'Diario', 'MOC', 'Ideas', 'Inventarios', 'Temporal', 'Notas'].map(
                   (folder) => (
                     <button
                       key={folder}
                       onClick={() => setNotesFolder(folder)}
-                      className={`rounded-xl px-3.5 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
+                      className={`shrink-0 rounded-xl px-3.5 py-2 sm:py-1.5 text-xs font-semibold transition-all cursor-pointer ${
                         notesFolder === folder
                           ? 'bg-[#f2b880] text-zinc-950'
                           : 'border border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10'
@@ -1403,14 +1422,14 @@ export default function App() {
                 )}
               </div>
 
-              <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2">
-                <Search className="h-4 w-4 text-zinc-400" />
+              <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 sm:py-2 w-full sm:w-auto">
+                <Search className="h-4 w-4 text-zinc-400 shrink-0" />
                 <input
                   type="text"
                   value={notesSearch}
                   onChange={(e) => setNotesSearch(e.target.value)}
                   placeholder="Buscar nota o #tag..."
-                  className="w-56 bg-transparent text-xs text-white placeholder:text-zinc-500 focus:outline-none"
+                  className="w-full sm:w-56 bg-transparent text-sm sm:text-xs text-white placeholder:text-zinc-500 focus:outline-none"
                 />
               </div>
             </div>
@@ -1430,7 +1449,7 @@ export default function App() {
                 >
                   <div>
                     <div className="flex items-start justify-between gap-2">
-                      <h3 className="text-sm font-bold text-white line-clamp-1">{n.title}</h3>
+                      <h3 className="text-base sm:text-sm font-bold text-white line-clamp-1">{n.title}</h3>
                       <span className="shrink-0 rounded-md bg-white/10 px-2 py-0.5 text-[10px] text-zinc-300">
                         {n.folder}
                       </span>
@@ -1557,11 +1576,11 @@ export default function App() {
 
         {/* ================= DECIDIR (TEMPORAL & IDEAS) ================= */}
         {tab === 'decidir' && (
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <div>
-              <h1 className="text-2xl font-extrabold text-white">Te toca decidir</h1>
-              <p className="text-xs text-zinc-400">
-                Notas en Temporal/ e Ideas/ listas para revisar, procesar o convertir en proyectos.
+              <h1 className="text-xl sm:text-2xl font-extrabold text-white">Te toca decidir</h1>
+              <p className="text-xs sm:text-sm text-zinc-400">
+                Notas en Temporal/ e Ideas/ listas para revisar o procesar.
               </p>
             </div>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -1576,12 +1595,12 @@ export default function App() {
                     className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-4 hover:border-[#f2b880]/40 cursor-pointer"
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <h3 className="text-sm font-bold text-white truncate">{n.title}</h3>
-                      <span className="rounded-md bg-[#f2b880]/15 px-2 py-0.5 text-[10px] font-semibold text-[#f2b880]">
+                      <h3 className="text-base sm:text-sm font-bold text-white truncate">{n.title}</h3>
+                      <span className="shrink-0 rounded-md bg-[#f2b880]/15 px-2 py-0.5 text-[10px] font-semibold text-[#f2b880]">
                         {n.folder}
                       </span>
                     </div>
-                    <p className="mt-2 line-clamp-2 text-xs text-zinc-400">{n.excerpt}</p>
+                    <p className="mt-1.5 line-clamp-2 text-xs text-zinc-400">{n.excerpt}</p>
                   </div>
                 ))}
             </div>
